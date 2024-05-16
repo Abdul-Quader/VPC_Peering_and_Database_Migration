@@ -1,5 +1,3 @@
-# VPC_Peering_and_Database_Migration
-Creating VPC peering, migrating data between databases, and sending a Slack notification upon success.
 **PROJECT 2: VPC peering and Database migration**
 
 **Project Description:**
@@ -64,12 +62,12 @@ Create VPC peering, migrating data between databases, and sending a Slack notifi
 - **Explanation:** Set up your AWS CLI by running aws configure command in your terminal and entering your access key and secret key.
   - 1. **VPC peering:**
 
-~~~aws ec2 create-vpc-peering-connection --vpc-id vpc-aid --peer-vpc-id vpc-bid --peer-region region~~~
+ ~~~  aws ec2 create-vpc-peering-connection --vpc-id vpc-aid --peer-vpc-id vpc-bid --peer-region region ~~~  
 
-- - ~~~aws ec2 create-vpc-peering-connection~~~: This command initiates a VPC peering request.
-    - \~~~--vpc-id vpc-aid~~~: Replace vpc-aid with the ID of your VPC-A (source VPC). You can find the VPC ID in the AWS Management Console under the VPC service.
-    - \~~~--peer-vpc-id vpc-bid~~~: Replace vpc-bid with the ID of your VPC-B (target VPC).
-    - \~~~--peer-region region~~~: Replace region with the AWS region where both VPCs reside (e.g., us-east-1).
+~~~    aws ec2 create-vpc-peering-connection ~~~  : This command initiates a VPC peering request.
+     ~~~  --vpc-id vpc-aid ~~~  : Replace vpc-aid with the ID of your VPC-A (source VPC). You can find the VPC ID in the AWS Management Console under the VPC service.
+     ~~~  --peer-vpc-id vpc-bid ~~~  : Replace vpc-bid with the ID of your VPC-B (target VPC).
+     ~~~  --peer-region region ~~~  : Replace region with the AWS region where both VPCs reside (e.g., us-east-1).
 
 **Initiate and Accept Peering Request:**
 
@@ -86,7 +84,7 @@ We'll initiate the peering request from VPC-A and then accept it from VPC-B.
 
 - **Explanation:** A bastion host is a secure entry point into a private network (VPC-B in this case). We'll launch an EC2 instance in the public subnet of VPC-A to access resources in VPC-B.
 - **Command Breakdown:**
-~~~
+ ~~~  
 aws ec2 run-instances \\
 
 \--image-id ami-0f3fed4b01e78e8c0 \\
@@ -100,14 +98,14 @@ aws ec2 run-instances \\
 \--security-group-ids sg-aid \\
 
 \--subnet-id subnet-aid
-~~~
-- - ~~~aws ec2 run-instances~~~: This command launches an EC2 instance.
-    - \~~~--image-id ami-0f3fed4b01e78e8c0~~~: Replace this with an AMI ID suitable for your database migration tool. Search the AWS Marketplace for AMIs with pre-installed tools like mysqldump or pg_dump.
-    - \~~~--count 1~~~: This specifies launching one instance.
-    - \~~~--instance-type t2.micro~~~: This defines the instance type (you can choose a different type based on your needs).
-    - \~~~--key-name your-key-pair~~~: Replace this with the name of your existing key pair that allows SSH access.
-    - \~~~--security-group-ids sg-aid~~~: Replace this with the security group ID that allows SSH access from your IP address (configured later).
-    - \~~~--subnet-id subnet-aid~~~: Replace this with the ID of the public subnet within VPC-A.
+ ~~~  
+- -  ~~~  aws ec2 run-instances ~~~  : This command launches an EC2 instance.
+     ~~~  --image-id ami-0f3fed4b01e78e8c0 ~~~  : Replace this with an AMI ID suitable for your database migration tool. Search the AWS Marketplace for AMIs with pre-installed tools like mysqldump or pg_dump.
+     ~~~  --count 1 ~~~  : This specifies launching one instance.
+     ~~~  --instance-type t2.micro ~~~  : This defines the instance type (you can choose a different type based on your needs).
+     ~~~  --key-name your-key-pair ~~~  : Replace this with the name of your existing key pair that allows SSH access.
+     ~~~  --security-group-ids sg-aid ~~~  : Replace this with the security group ID that allows SSH access from your IP address (configured later).
+     ~~~  --subnet-id subnet-aid ~~~  : Replace this with the ID of the public subnet within VPC-A.
 
 1. **Accessing the Bastion Host:**
 
@@ -200,7 +198,7 @@ There are two options for database migration:
 - A Slack App with the "chat:write" permission and a Bot User OAuth Token (<https://api.slack.com/>)
 
 **Shell Script (slack_notification.sh):**
-~~~
+ ~~~  
 # !/bin/bash
 
 \# Replace with your details
@@ -224,7 +222,7 @@ else
 echo "Error sending notification to Slack!"
 
 fi
-~~~
+ ~~~  
 **Explanation:**
 
 - The script defines variables for the Slack notification URL and the message.
@@ -242,11 +240,11 @@ fi
 
 Syntax:
 
-~~~ bash slack_notification.sh ~~~
+ ~~~   bash slack_notification.sh  ~~~  
 
 OR
 
-~~~ Source slack_notification.sh ~~~
+ ~~~   Source slack_notification.sh  ~~~  
 
 **Sample Database and Custom Script for Database Migration**
 
@@ -258,12 +256,12 @@ Simple MySQL database named "my_database" with two tables: "users" and "posts".
 
 Connect to your MySQL server in VPC-A and execute the following command to create the database:
 
-~~~ CREATE DATABASE my_database; ~~~ 
+ ~~~   CREATE DATABASE my_database;  ~~~   
 
 **b. Create Tables:**
 
 Connect to database "my_database" and execute the following commands to create tables:
-~~~
+ ~~~  
 USE my_database;
 
 CREATE TABLE users (
@@ -289,9 +287,9 @@ content TEXT,
 FOREIGN KEY (user_id) REFERENCES users(id)
 
 );
-~~~
+ ~~~  
 **c. Populate Sample Data:**
-~~~
+ ~~~  
 Insert sample data into the tables using INSERT statements.
 
 INSERT INTO users (username, email) VALUES ("john_doe", "<john.doe@example.com>");
@@ -301,11 +299,11 @@ INSERT INTO users (username, email) VALUES ("jane_smith", "<jane.smith@example.c
 INSERT INTO posts (user_id, title, content) VALUES (1, "My First Post", "This is the content of my first post.");
 
 INSERT INTO posts (user_id, title, content) VALUES (2, "Another Post", "Here's some more content.");
-~~~
+ ~~~  
 **2\. Custom Script for Database Migration (using mysqldump):**
 
 **a. Script on Bastion Host (mysqldump_migration.sh):**
-~~~
+ ~~~  
 # !/bin/bash
 
 \# Replace with your actual values
@@ -363,7 +361,7 @@ echo "Database migration complete!"
 rm -f source_dump.sql
 
 exit 0
-~~~
+ ~~~  
 **b. Explanation:**
 
 - The script defines variables for source and target database connection details.
