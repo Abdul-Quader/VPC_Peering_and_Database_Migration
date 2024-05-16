@@ -61,13 +61,14 @@ Create VPC peering, migrating data between databases, and sending a Slack notifi
 
 - **Explanation:** Set up your AWS CLI by running aws configure command in your terminal and entering your access key and secret key.
   - 1. **VPC peering:**
+ ~~~
+  aws ec2 create-vpc-peering-connection --vpc-id vpc-aid --peer-vpc-id vpc-bid --peer-region region
+  ~~~
 
- ~~~  aws ec2 create-vpc-peering-connection --vpc-id vpc-aid --peer-vpc-id vpc-bid --peer-region region ~~~  
-
-~~~    aws ec2 create-vpc-peering-connection ~~~  : This command initiates a VPC peering request.
-     ~~~  --vpc-id vpc-aid ~~~  : Replace vpc-aid with the ID of your VPC-A (source VPC). You can find the VPC ID in the AWS Management Console under the VPC service.
-     ~~~  --peer-vpc-id vpc-bid ~~~  : Replace vpc-bid with the ID of your VPC-B (target VPC).
-     ~~~  --peer-region region ~~~  : Replace region with the AWS region where both VPCs reside (e.g., us-east-1).
+       --aws ec2 create-vpc-peering-connection   : This command initiates a VPC peering request.
+       --vpc-id vpc-aid   : Replace vpc-aid with the ID of your VPC-A (source VPC). You can find the VPC ID in the AWS Management Console under the VPC service.
+       --peer-vpc-id vpc-bid   : Replace vpc-bid with the ID of your VPC-B (target VPC).
+       --peer-region region   : Replace region with the AWS region where both VPCs reside (e.g., us-east-1).
 
 **Initiate and Accept Peering Request:**
 
@@ -84,7 +85,7 @@ We'll initiate the peering request from VPC-A and then accept it from VPC-B.
 
 - **Explanation:** A bastion host is a secure entry point into a private network (VPC-B in this case). We'll launch an EC2 instance in the public subnet of VPC-A to access resources in VPC-B.
 - **Command Breakdown:**
- ~~~  
+~~~   
 aws ec2 run-instances \\
 
 \--image-id ami-0f3fed4b01e78e8c0 \\
@@ -99,13 +100,13 @@ aws ec2 run-instances \\
 
 \--subnet-id subnet-aid
  ~~~  
-- -  ~~~  aws ec2 run-instances ~~~  : This command launches an EC2 instance.
-     ~~~  --image-id ami-0f3fed4b01e78e8c0 ~~~  : Replace this with an AMI ID suitable for your database migration tool. Search the AWS Marketplace for AMIs with pre-installed tools like mysqldump or pg_dump.
-     ~~~  --count 1 ~~~  : This specifies launching one instance.
-     ~~~  --instance-type t2.micro ~~~  : This defines the instance type (you can choose a different type based on your needs).
-     ~~~  --key-name your-key-pair ~~~  : Replace this with the name of your existing key pair that allows SSH access.
-     ~~~  --security-group-ids sg-aid ~~~  : Replace this with the security group ID that allows SSH access from your IP address (configured later).
-     ~~~  --subnet-id subnet-aid ~~~  : Replace this with the ID of the public subnet within VPC-A.
+       --aws ec2 run-instances   : This command launches an EC2 instance.
+       --image-id ami-0f3fed4b01e78e8c0   : Replace this with an AMI ID suitable for your database migration tool. Search the AWS Marketplace for AMIs with pre-installed tools like mysqldump or pg_dump.
+       --count 1   : This specifies launching one instance.
+       --instance-type t2.micro   : This defines the instance type (you can choose a different type based on your needs).
+       --key-name your-key-pair   : Replace this with the name of your existing key pair that allows SSH access.
+       --security-group-ids sg-aid   : Replace this with the security group ID that allows SSH access from your IP address (configured later).
+       --subnet-id subnet-aid   : Replace this with the ID of the public subnet within VPC-A.
 
 1. **Accessing the Bastion Host:**
 
@@ -198,31 +199,24 @@ There are two options for database migration:
 - A Slack App with the "chat:write" permission and a Bot User OAuth Token (<https://api.slack.com/>)
 
 **Shell Script (slack_notification.sh):**
- ~~~  
-# !/bin/bash
+~~~   
+#!/bin/bash
 
-\# Replace with your details
-
-SLACK_URL="<https://hooks.slack.com/services/YOUR_WORKSPACE/YOUR_CHANNEL/YOUR_BOT_TOKEN>"
-
+# Replace with your details
+SLACK_URL="https://hooks.slack.com/services/YOUR_WORKSPACE/YOUR_CHANNEL/YOUR_BOT_TOKEN"
 MESSAGE="Database migration from VPC-A to VPC-B completed successfully!"
 
-\# Send notification using curl
+# Send notification using curl
+curl -X POST -H 'Content-Type: application/json' \
+  -d "{\"text\": \"$MESSAGE\"}" $SLACK_URL
 
-curl -X POST -H 'Content-Type: application/json' \\
-
-\-d "{\\"text\\": \\"$MESSAGE\\"}" $SLACK_URL
-
-if \[ $? -eq 0 \]; then
-
-echo "Successfully sent notification to Slack channel."
-
+if [ $? -eq 0 ]; then
+  echo "Successfully sent notification to Slack channel."
 else
-
-echo "Error sending notification to Slack!"
-
+  echo "Error sending notification to Slack!"
 fi
- ~~~  
+
+~~~   
 **Explanation:**
 
 - The script defines variables for the Slack notification URL and the message.
@@ -239,13 +233,13 @@ fi
 - Execute the script after successful database migration (e.g., call it from your main migration script after the echo "Database migration complete!" line).
 
 Syntax:
-
- ~~~   bash slack_notification.sh  ~~~  
-
+~~~
+    bash slack_notification.sh    
+~~~
 OR
-
- ~~~   Source slack_notification.sh  ~~~  
-
+~~~
+    Source slack_notification.sh    
+~~~
 **Sample Database and Custom Script for Database Migration**
 
 **1\. Sample Database (source database in VPC-A):**
@@ -255,13 +249,13 @@ Simple MySQL database named "my_database" with two tables: "users" and "posts".
 **a. Create Database:**
 
 Connect to your MySQL server in VPC-A and execute the following command to create the database:
-
- ~~~   CREATE DATABASE my_database;  ~~~   
-
+~~~
+    CREATE DATABASE my_database;     
+~~~
 **b. Create Tables:**
 
 Connect to database "my_database" and execute the following commands to create tables:
- ~~~  
+~~~   
 USE my_database;
 
 CREATE TABLE users (
@@ -299,69 +293,53 @@ INSERT INTO users (username, email) VALUES ("jane_smith", "<jane.smith@example.c
 INSERT INTO posts (user_id, title, content) VALUES (1, "My First Post", "This is the content of my first post.");
 
 INSERT INTO posts (user_id, title, content) VALUES (2, "Another Post", "Here's some more content.");
- ~~~  
+~~~
+
 **2\. Custom Script for Database Migration (using mysqldump):**
 
 **a. Script on Bastion Host (mysqldump_migration.sh):**
  ~~~  
-# !/bin/bash
+#!/bin/bash
 
-\# Replace with your actual values
-
-SOURCE_HOST="10.x.x.x" # Source database hostname/IP
-
+# Replace with your actual values
+SOURCE_HOST="10.x.x.x"  # Source database hostname/IP
 SOURCE_USER="source_user"
-
 SOURCE_PASSWORD="source_password"
-
 SOURCE_DATABASE="my_database"
 
-TARGET_HOST="12.x.x.x" # Target database hostname/IP (reachable via bastion host)
-
+TARGET_HOST="12.x.x.x"  # Target database hostname/IP (reachable via bastion host)
 TARGET_USER="target_user"
-
 TARGET_PASSWORD="target_password"
+TARGET_DATABASE="my_database"  # Same name for target database
 
-TARGET_DATABASE="my_database" # Same name for target database
-
-\# Dump source database
-
+# Dump source database
 mysqldump -h $SOURCE_HOST -u $SOURCE_USER -p$SOURCE_PASSWORD $SOURCE_DATABASE > source_dump.sql
 
-\# Connect to target database via SSH tunnel (modify SSH details as needed)
-
+# Connect to target database via SSH tunnel (modify SSH details as needed)
 ssh -o ProxyCommand="ssh -p 22 bastion_user@bastion_host" -i ~/.ssh/key_pair.pem $TARGET_USER@$TARGET_HOST "mysql -u $TARGET_USER -p$TARGET_PASSWORD"
 
-\# Check connection (optional)
-
-if \[ $? -eq 0 \]; then
-
-echo "Connected to target database successfully."
-
+# Check connection (optional)
+if [ $? -eq 0 ]; then
+  echo "Connected to target database successfully."
 else
-
-echo "Error connecting to target database!"
-
-exit 1
-
+  echo "Error connecting to target database!"
+  exit 1
 fi
 
-\# Create database on target if it doesn't exist
-
+# Create database on target if it doesn't exist
 mysql -u $TARGET_USER -p$TARGET_PASSWORD -e "CREATE DATABASE IF NOT EXISTS $TARGET_DATABASE;"
 
-\# Import data into target database
-
+# Import data into target database
 mysql -u $TARGET_USER -p$TARGET_PASSWORD $TARGET_DATABASE < source_dump.sql
 
 echo "Database migration complete!"
 
-\# Clean up (optional)
-
+# Clean up (optional)
 rm -f source_dump.sql
 
 exit 0
- ~~~  
+
+  ~~~ 
 **b. Explanation:**
 
 - The script defines variables for source and target database connection details.
