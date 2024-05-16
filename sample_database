@@ -1,0 +1,29 @@
+#SQL database creation 
+
+# Creating Database to be created on both source and destination(target)
+CREATE DATABASE my_database;
+
+#Create Tables (only on Source)
+USE my_database;
+
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE posts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  content TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+
+#populate Sample data ((only on Source))
+INSERT INTO users (username, email) VALUES ("john_doe", "john.doe@example.com");
+INSERT INTO users (username, email) VALUES ("jane_smith", "jane.smith@example.com");
+
+INSERT INTO posts (user_id, title, content) VALUES (1, "My First Post", "This is the content of my first post.");
+INSERT INTO posts (user_id, title, content) VALUES (2, "Another Post", "Here's some more content.");
