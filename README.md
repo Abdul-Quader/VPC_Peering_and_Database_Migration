@@ -86,19 +86,13 @@ We'll initiate the peering request from VPC-A and then accept it from VPC-B.
 - **Explanation:** A bastion host is a secure entry point into a private network (VPC-B in this case). We'll launch an EC2 instance in the public subnet of VPC-A to access resources in VPC-B.
 - **Command Breakdown:**
 ~~~   
-aws ec2 run-instances \\
-
-\--image-id ami-0f3fed4b01e78e8c0 \\
-
-\--count 1 \\
-
-\--instance-type t2.micro \\
-
-\--key-name your-key-pair \\
-
-\--security-group-ids sg-aid \\
-
-\--subnet-id subnet-aid
+aws ec2 run-instances \
+--image-id ami-0f3fed4b01e78e8c0 \
+--count 1 \
+--instance-type t2.micro \
+--key-name your-key-pair \
+--security-group-ids sg-aid \
+--subnet-id subnet-aid
  ~~~  
        --aws ec2 run-instances   : This command launches an EC2 instance.
        --image-id ami-0f3fed4b01e78e8c0   : Replace this with an AMI ID suitable for your database migration tool. Search the AWS Marketplace for AMIs with pre-installed tools like mysqldump or pg_dump.
@@ -352,5 +346,4 @@ exit 0
 
 - Replace all placeholders with your actual values (database details, usernames, passwords, SSH information).
 - Ensure the script has proper permissions to execute (chmod +x mysqldump_migration.sh).
-- Consider implementing additional error handling and logging in your script for robustness.
-- This script provides a basic example. You might need to modify it based on your specific database technology and security requirements.
+
